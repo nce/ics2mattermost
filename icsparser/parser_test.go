@@ -57,3 +57,49 @@ func TestGetTodaysEvents(t *testing.T) {
 
   assert.Equal(t, 0, len(c.Events))
 }
+
+func TestGetPersonsByCategory(t *testing.T) {
+  var e Event
+  var test string
+  var err error
+
+  e.Categories = []string{"travel"}
+  e.Attendees = []gocal.Attendee{{Cn: "asdf"}, {Cn: "foo"}}
+  test, err = e.GetPersonsByCategory("travel")
+
+  assert.Equal(t, "asdf, foo", test)
+  assert.Nil(t, err)
+
+  // wrong category
+  e.Categories = []string{"other"}
+  e.Attendees = []gocal.Attendee{{Cn: "asdf"}, {Cn: "foo"}}
+  test, err = e.GetPersonsByCategory("travel")
+
+  assert.Equal(t, "", test)
+  assert.NotNil(t, err)
+
+  // no attendee
+  e.Categories = []string{"travel"}
+  e.Attendees = []gocal.Attendee{{}, {}}
+  test, err = e.GetPersonsByCategory("travel")
+
+  assert.Equal(t, "", test)
+  assert.NotNil(t, err)
+
+  // no attendee
+  e.Categories = []string{"travel"}
+  e.Attendees = []gocal.Attendee{}
+  test, err = e.GetPersonsByCategory("travel")
+
+  assert.Equal(t, "", test)
+  assert.NotNil(t, err)
+
+  // one attendee on different cateogry
+  e.Categories = []string{"leaves"}
+  e.Attendees = []gocal.Attendee{{Cn: "Bar Foo"}}
+  test, err = e.GetPersonsByCategory("leaves")
+
+  assert.Equal(t, "Bar Foo", test)
+  assert.Nil(t, err)
+
+}

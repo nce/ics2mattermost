@@ -3,6 +3,8 @@ package icsparser
 import (
 	"bytes"
 	"io"
+	"strings"
+  "errors"
 
 	"github.com/apognu/gocal"
 	"github.com/nce/ics2mattermost/logger"
@@ -24,7 +26,7 @@ type Calendar struct {
 }
 
 type Event struct {
-   t gocal.Event
+   gocal.Event
 }
 
 func (i *ics) queryCalendar() *gocal.Gocal {
@@ -71,7 +73,7 @@ func (c *Calendar) GetTodaysEvents() {
   //loc, _ := time.LoadLocation("Europe/Berlin")
 
   // truncate a day at 23:59 to filter only TODAYS events
-  start, end := time.Now(), time.Now().Add(2*24*time.Hour).Truncate(24*time.Hour)
+  start, end := time.Now(), time.Now().Add(1*24*time.Hour).Truncate(24*time.Hour)
   c.cal.Start, c.cal.End = &start, &end
 
   err := c.cal.Parse()
@@ -79,17 +81,42 @@ func (c *Calendar) GetTodaysEvents() {
     logger.Fatal(fmt.Sprintf("could not parse calendar: %s", err.Error()))
   }
 
-  //c.Events = c.cal.Events
-  for _, foo := range c.cal.Events {
-    c.Events = append(c.Events, foo)
+  // a bit messy, but we need to "cast" gocal.Event to Event
+  // to add new Methods on the outside package
+  for _, e := range c.cal.Events {
+    c.Events = append(c.Events, Event{e})
   }
-  //c.Events = Event{t: c.cal.Events}
 }
 
-func (e *Event) GetTravellingPersons() string {
-  //return e.Attendees[0].Cn
+func (c *Calendar) GetEventByName(eventName string) (Event, error) {
+
+  for _, event := range c.Events {
+    if event.Summary == eventName {
+      return event, nil
+    }
+  }
+
+  return Event{gocal.Event{Summary: "No event found"}}, errors.New("no event found")
 }
 
-func (c *Calendar) GetDate() {
-  logger.Error(c.cal.Start.String())
+func (e *Event) GetPersonsByCategory(calendarCategory string) (string, error) {
+  var attendees []string
+
+  for _, category := range e.Categories {
+    if category == calendarCategory {
+      for _, name := range e.Attendees {
+        if name.Cn == "" {
+          continue
+        }
+        attendees = append(attendees, name.Cn)
+      }
+    }
+  }
+
+  if len(attendees) == 0 {
+    return "", errors.New("No attendees")
+  }
+
+  return strings.Join(attendees, ", "), nil
 }
+

@@ -1,2 +1,3 @@
 env.sh
-.ics2mattermost
+ics2mattermost
+testdata/
