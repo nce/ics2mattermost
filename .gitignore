@@ -1,3 +1,5 @@
 env.sh
 ics2mattermost
 testdata/
+.DS_Store
+version

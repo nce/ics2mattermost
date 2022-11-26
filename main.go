@@ -9,6 +9,7 @@ import (
 	"github.com/nce/ics2mattermost/mattermost"
 
 	"strings"
+  _ "embed"
 )
 
 type DailyIngest struct {
@@ -17,13 +18,36 @@ type DailyIngest struct {
   AbsentPersons string
 }
 
+//go:generate bash setVersion.sh
+//go:embed Version
+var Version string
+
 func main() {
   logger.SetupLogging(strings.ToLower("debug"))
 
+  logger.Info(fmt.Sprintf("Application version %s", Version))
+
+  var err error
+  var icsUrl, icsUser, icsToken string
+  var ok bool
+
+  icsUrl, ok = os.LookupEnv("ICS_URL")
+  if !ok {
+    logger.Fatal("ENV Var ICS_URL not set")
+  }
+  icsUser, ok = os.LookupEnv("ICS_USER")
+  if !ok {
+    logger.Fatal("ENV Var ICS_USER not set")
+  }
+  icsToken, ok = os.LookupEnv("ICS_TOKEN")
+  if !ok {
+    logger.Fatal("ENV Var ICS_TOKEN not set")
+  }
+
   cal := icsparser.Setup(
-      os.Getenv("ICS_URL"),
-      os.Getenv("ICS_USER"),
-      os.Getenv("ICS_TOKEN"))
+      icsUrl,
+      icsUser,
+      icsToken)
 
   webhook := mattermost.Setup(os.Getenv("MATTERMOST_URL"))
 
@@ -49,7 +73,6 @@ func main() {
     }
   }
 
-  var err error
   ingest.Daily, err = cal.GetEventByName("DAILY (ALL)")
   logger.Info(err.Error())
   if err == nil {

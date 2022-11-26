@@ -11,7 +11,7 @@ deps:
 
 build: deps
 	@echo ">> building binaries"
-	$(GO_FLAGS) $(GO) build -ldflags '-X "main.Version=${VERSION}"' -o $(NAME)
+	$(GO_FLAGS) $(GO) build -o $(NAME)
 
 run: build
 	$(GO) run . -l DEBUG
