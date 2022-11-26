@@ -1,14 +1,14 @@
 package main
 
 import (
-	"fmt"
-	"os"
+  "fmt"
+  "os"
 
-	"github.com/nce/ics2mattermost/icsparser"
-	"github.com/nce/ics2mattermost/logger"
-	"github.com/nce/ics2mattermost/mattermost"
+  "github.com/nce/ics2mattermost/icsparser"
+  "github.com/nce/ics2mattermost/logger"
+  "github.com/nce/ics2mattermost/mattermost"
 
-	"strings"
+  "strings"
   _ "embed"
 )
 
@@ -22,34 +22,33 @@ type DailyIngest struct {
 //go:embed Version
 var Version string
 
+func checkIfEmpty(env string) string {
+  ret, ok := os.LookupEnv(env)
+  if !ok {
+    logger.Fatal(fmt.Sprintf("ENV Var '%s' not set; Check help", env))
+  }
+  return ret
+}
+
 func main() {
   logger.SetupLogging(strings.ToLower("debug"))
 
   logger.Info(fmt.Sprintf("Application version %s", Version))
 
   var err error
-  var icsUrl, icsUser, icsToken string
-  var ok bool
+  var icsUrl, icsUser, icsToken, mattermostUrl string
 
-  icsUrl, ok = os.LookupEnv("ICS_URL")
-  if !ok {
-    logger.Fatal("ENV Var ICS_URL not set")
-  }
-  icsUser, ok = os.LookupEnv("ICS_USER")
-  if !ok {
-    logger.Fatal("ENV Var ICS_USER not set")
-  }
-  icsToken, ok = os.LookupEnv("ICS_TOKEN")
-  if !ok {
-    logger.Fatal("ENV Var ICS_TOKEN not set")
-  }
+  icsUrl = checkIfEmpty("ICS_URL")
+  icsUser = checkIfEmpty("ICS_USER")
+  icsToken = checkIfEmpty("ICS_TOKEN")
+  mattermostUrl = checkIfEmpty("MATTERMOST_URL")
 
   cal := icsparser.Setup(
       icsUrl,
       icsUser,
       icsToken)
 
-  webhook := mattermost.Setup(os.Getenv("MATTERMOST_URL"))
+  webhook := mattermost.Setup(mattermostUrl)
 
   cal.GetTodaysEvents()
 
@@ -58,7 +57,11 @@ func main() {
     logger.Info(foo.Summary)
   }
 
-  ingest := DailyIngest{Daily: icsparser.Event{}, TravellingPersons: "*no one*", AbsentPersons: "*no one*"}
+  ingest := DailyIngest{
+      Daily: icsparser.Event{},
+      TravellingPersons: "*no one*", 
+      AbsentPersons: "*no one*",
+  }
 
   for _, event := range cal.Events {
     travelers, err := event.GetPersonsByCategory("travel")
