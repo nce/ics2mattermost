@@ -36,14 +36,14 @@ func (i *ics) queryCalendar() *gocal.Gocal {
   req, err := http.NewRequest("GET", i.icsUrl, nil)
 
   if err != nil {
-    panic(fmt.Errorf("Got error %s", err.Error()))
+    panic(fmt.Errorf("got error %s", err.Error()))
   }
 
   req.SetBasicAuth(i.authEmail, i.authToken)
 
   response, err := client.Do(req)
   if err != nil {
-    panic(fmt.Errorf("Got error %s", err.Error()))
+    panic(fmt.Errorf("got error %s", err.Error()))
   }
   defer response.Body.Close()
 
@@ -114,7 +114,7 @@ func (e *Event) GetPersonsByCategory(calendarCategory string) (string, error) {
   }
 
   if len(attendees) == 0 {
-    return "", errors.New("No attendees")
+    return "", errors.New("no attendees")
   }
 
   return strings.Join(attendees, ", "), nil

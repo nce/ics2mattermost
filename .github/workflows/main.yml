@@ -12,9 +12,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Build app
-        id: compile
-        run: make build
+      - name: Build & test app
+        id: test
+        run: make test
 
       - name: Scan for Vulnerabilities in Code
         uses: Templum/govulncheck-action@v0.0.8

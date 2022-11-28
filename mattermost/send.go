@@ -6,7 +6,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/nce/ics2mattermost/logger"
@@ -29,7 +29,7 @@ func (w *webhook) Send(message map[string]string) {
         panic(err)
     }
 
-    body, _ := ioutil.ReadAll(resp.Body)
+    body, _ := io.ReadAll(resp.Body)
     logger.Debug(fmt.Sprintf("Mattermost HTTP status: %s, body: %s", resp.Status, string(body)))
 }
 
