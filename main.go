@@ -9,6 +9,7 @@ import (
   "github.com/nce/ics2mattermost/mattermost"
 
   "strings"
+  "time"
   _ "embed"
 )
 
@@ -77,18 +78,26 @@ func main() {
   }
 
   ingest.Daily, err = cal.GetEventByName("DAILY (ALL)")
-  logger.Info(err.Error())
-  if err == nil {
+  if err != nil {
+    logger.Error(err.Error())
+  } else  {
 
+    loc, _ := time.LoadLocation("Europe/Berlin")
     dailyMessage := map[string]string{
       "name": "Foobar",
       "text": "#### Welcome to today's daily ingest\n " +
-      ":calendar: " + ingest.Daily.Summary + " -- " + ingest.Daily.Start.Format("15:04 MST") +
-      " - " + ingest.Daily.End.Format("15:04 MST") + "\n" +
+      ":calendar: " + ingest.Daily.Summary + " -- " + ingest.Daily.Start.In(loc).Format("15:04 MST") +
+      " - " + ingest.Daily.End.In(loc).Format("15:04 MST") + "\n" +
       ":link: *Daily* ➞ [Microsoft Teams](" + ingest.Daily.Location + ") \n" +
       ":airplane: " + ingest.TravellingPersons + "\n" +
       ":palm_tree: " + ingest.AbsentPersons,
     }
+
+    logger.Info(
+        fmt.Sprintf("Sent out daily digest with %d persons travelling " +
+                    "and %d persons absent", strings.Count(ingest.TravellingPersons, ","),
+                    strings.Count(ingest.AbsentPersons, ",")))
+
     webhook.Send(dailyMessage)
 
   }

@@ -5,7 +5,11 @@ import (
 
 	"bytes"
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"net/http"
+
+	"github.com/nce/ics2mattermost/logger"
 )
 
 type webhook struct {
@@ -19,14 +23,15 @@ func (w *webhook) Send(message map[string]string) {
         panic(err)
     }
 
-    _, err = http.Post(w.url, "application/json",
+    resp, err := http.Post(w.url, "application/json",
         bytes.NewBuffer(json_data))
-
     if err != nil {
         panic(err)
     }
-}
 
+    body, _ := ioutil.ReadAll(resp.Body)
+    logger.Debug(fmt.Sprintf("Mattermost HTTP status: %s, body: %s", resp.Status, string(body)))
+}
 
 func Setup(webhookUrl string) *webhook {
     w := webhook{url: webhookUrl }
