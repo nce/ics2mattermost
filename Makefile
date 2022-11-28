@@ -1,8 +1,9 @@
 SHELL = /bin/bash
 GO         ?= go
 GO_VERSION ?= $(shell $(GO) version)
-GO_ARCH    ?= arm64
-GO_FLAGS   ?= CGO_ENABLED=0 GOOS=linux GOARCH=$(GO_ARCH)
+TARGETARCH ?= arm64
+TARGETOS   ?= linux
+GO_FLAGS   ?= CGO_ENABLED=0 GOOS=$(TARGETOS) GOARCH=$(TARGETARCH)
 
 NAME = ics2mattermost
 

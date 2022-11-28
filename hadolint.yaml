@@ -1,0 +1,4 @@
+ignored:
+  # Always tag the version of an image explicitly
+  # distorless images have nothing than latest
+  - DL3006
