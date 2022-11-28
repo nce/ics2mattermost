@@ -15,8 +15,10 @@ jobs:
       - name: Build & test app
         id: test
         run: |
-          go install honnef.co/go/tools/cmd/staticcheck@latest
           make test
+
+      - name: Check
+        uses: dominikh/staticcheck-action@v1.2.0
 
       - name: Scan for Vulnerabilities in Code
         uses: Templum/govulncheck-action@v0.0.8
