@@ -1,0 +1,22 @@
+name: Bulid
+on:
+- push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Scan for Vulnerabilities in Code
+        uses: Templum/govulncheck-action@v0.0.8
+        with:
+          go-version: 1.19
+          vulncheck-version: latest
+          package: ./...
+          fail-on-vuln: true
+
+      - name: Lint Dockerfile
+        uses: hadolint/hadolint-action@v2.0.0
+        with:
+          dockerfile: Dockerfile
+          config: hadolint.yaml

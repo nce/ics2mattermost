@@ -18,8 +18,8 @@ type DailyIngest struct {
   AbsentPersons string
 }
 
-//go:generate bash setVersion.sh
-//go:embed Version
+//go:generate sh setVersion.sh
+//go:embed version
 var Version string
 
 func checkIfEmpty(env string) string {

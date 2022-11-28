@@ -14,6 +14,7 @@ aggregated information.
 # Development
 Setup:
 ```bash
+pre-commit install --hook-type commit-msg
 brew install go
 brew install podman-compose
 podman-compose up
