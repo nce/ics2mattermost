@@ -43,7 +43,8 @@ func main() {
 
   s := gocron.NewScheduler(time.Local)
 
-  s.Every("1h").Do(func() {
+  //s.Every(1).Weeks().Monday().Tuesday().Wednesday().Thursday().At("8:30").Do(func() {
+  s.Every(20).Seconds().Do(func() {
 
     cal := icsparser.Setup(
         icsUrl,

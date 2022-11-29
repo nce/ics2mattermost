@@ -3,7 +3,6 @@ package icsparser
 import (
   "bytes"
   "io"
-  "strings"
   "errors"
 
   "github.com/apognu/gocal"
@@ -117,7 +116,7 @@ func (c *Calendar) GetEventByName(eventName string) (Event, error) {
       errors.New("no event found")
 }
 
-func (e *Event) GetPersonsByCategory(calendarCategory string) (string, error) {
+func (e *Event) GetPersonsByCategory(calendarCategory string) ([]string, error) {
   var attendees []string
 
   for _, category := range e.Categories {
@@ -132,10 +131,10 @@ func (e *Event) GetPersonsByCategory(calendarCategory string) (string, error) {
   }
 
   if len(attendees) == 0 {
-    return "", errors.New("no attendees")
+    return nil, errors.New("no attendees")
   }
 
-  return strings.Join(attendees, ", "), nil
+  return attendees, nil
 }
 
 
