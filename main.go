@@ -3,21 +3,17 @@ package main
 import (
   "fmt"
   "os"
+  "time"
 
   "github.com/nce/ics2mattermost/icsparser"
   "github.com/nce/ics2mattermost/logger"
   "github.com/nce/ics2mattermost/mattermost"
 
+  "github.com/go-co-op/gocron"
+
   "strings"
-  "time"
   _ "embed"
 )
-
-type DailyIngest struct {
-  Daily icsparser.Event
-  TravellingPersons string
-  AbsentPersons string
-}
 
 //go:generate sh setVersion.sh
 //go:embed version
@@ -36,7 +32,6 @@ func main() {
 
   logger.Info(fmt.Sprintf("Application version %s", Version))
 
-  var err error
   var icsUrl, icsUser, icsToken, mattermostUrl string
 
   icsUrl = checkIfEmpty("ICS_URL")
@@ -44,62 +39,28 @@ func main() {
   icsToken = checkIfEmpty("ICS_TOKEN")
   mattermostUrl = checkIfEmpty("MATTERMOST_URL")
 
-  cal := icsparser.Setup(
-      icsUrl,
-      icsUser,
-      icsToken)
-
   webhook := mattermost.Setup(mattermostUrl)
 
-  cal.GetTodaysEvents()
+  s := gocron.NewScheduler(time.Local)
 
-  logger.Info(fmt.Sprintf("Meetings: %d", len(cal.Events)))
-  for _, foo := range cal.Events {
-    logger.Info(foo.Summary)
-  }
+  s.Every("1h").Do(func() {
 
-  ingest := DailyIngest{
-      Daily: icsparser.Event{},
-      TravellingPersons: "*no one*", 
-      AbsentPersons: "*no one*",
-  }
+    cal := icsparser.Setup(
+        icsUrl,
+        icsUser,
+        icsToken)
 
-  for _, event := range cal.Events {
-    travelers, err := event.GetPersonsByCategory("travel")
+    cal.GetTodaysEvents()
 
+    dailyMessage, err := cal.PrepareDailyIngest()
     if err == nil {
-      ingest.TravellingPersons = travelers
+      webhook.Send(dailyMessage)
+    } else {
+      logger.Error(
+        fmt.Sprintf("could not prepare daily: %s", err.Error()))
     }
 
-    absents, err := event.GetPersonsByCategory("leaves")
-    if err == nil {
-      ingest.AbsentPersons = absents
-    }
-  }
+  })
 
-  ingest.Daily, err = cal.GetEventByName("DAILY (ALL)")
-  if err != nil {
-    logger.Error(err.Error())
-  } else  {
-
-    loc, _ := time.LoadLocation("Europe/Berlin")
-    dailyMessage := map[string]string{
-      "name": "Foobar",
-      "text": "#### Welcome to today's daily ingest\n " +
-      ":calendar: " + ingest.Daily.Summary + " -- " + ingest.Daily.Start.In(loc).Format("15:04 MST") +
-      " - " + ingest.Daily.End.In(loc).Format("15:04 MST") + "\n" +
-      ":link: *Daily* ➞ [Microsoft Teams](" + ingest.Daily.Location + ") \n" +
-      ":airplane: " + ingest.TravellingPersons + "\n" +
-      ":palm_tree: " + ingest.AbsentPersons,
-    }
-
-    logger.Info(
-        fmt.Sprintf("Sent out daily digest with %d persons travelling " +
-                    "and %d persons absent", strings.Count(ingest.TravellingPersons, ","),
-                    strings.Count(ingest.AbsentPersons, ",")))
-
-    webhook.Send(dailyMessage)
-
-  }
-
+  s.StartBlocking()
 }

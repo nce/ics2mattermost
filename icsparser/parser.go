@@ -1,17 +1,18 @@
 package icsparser
 
 import (
-	"bytes"
-	"io"
-	"strings"
+  "bytes"
+  "io"
+  "strings"
   "errors"
 
-	"github.com/apognu/gocal"
-	"github.com/nce/ics2mattermost/logger"
+  "github.com/apognu/gocal"
+  "github.com/nce/ics2mattermost/logger"
 
-	"fmt"
-	"net/http"
-	"time"
+  "fmt"
+  "net/http"
+  "time"
+  "sort"
 )
 
 type ics struct {
@@ -57,6 +58,16 @@ func (i *ics) queryCalendar() *gocal.Gocal {
   return c
 }
 
+func beginOfDay() time.Time {
+  t := time.Now()
+  return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
+}
+
+func endOfDay() time.Time {
+  t := time.Now().Add(1 * 24 * time.Hour)
+  return t.Truncate(24 * time.Hour)
+}
+
 func Setup(icsUrl string, authEmail string, authToken string) *Calendar {
 
   var confluence = ics{
@@ -73,7 +84,7 @@ func (c *Calendar) GetTodaysEvents() {
   //loc, _ := time.LoadLocation("Europe/Berlin")
 
   // truncate a day at 23:59 to filter only TODAYS events
-  start, end := time.Now(), time.Now().Add(1*24*time.Hour).Truncate(24*time.Hour)
+  start, end := beginOfDay(), endOfDay()
   c.cal.Start, c.cal.End = &start, &end
 
   err := c.cal.Parse()
@@ -86,6 +97,11 @@ func (c *Calendar) GetTodaysEvents() {
   for _, e := range c.cal.Events {
     c.Events = append(c.Events, Event{e})
   }
+
+  // crazy sorting of the events by start time
+  sort.Slice(c.Events, func(i, j int) bool {
+    return c.Events[i].Start.Before(*c.Events[j].Start)
+  })
 }
 
 func (c *Calendar) GetEventByName(eventName string) (Event, error) {
@@ -96,7 +112,9 @@ func (c *Calendar) GetEventByName(eventName string) (Event, error) {
     }
   }
 
-  return Event{gocal.Event{Summary: "No event found"}}, errors.New("no event found")
+  return Event{
+      gocal.Event{Summary: "No event found"}},
+      errors.New("no event found")
 }
 
 func (e *Event) GetPersonsByCategory(calendarCategory string) (string, error) {
@@ -119,4 +137,5 @@ func (e *Event) GetPersonsByCategory(calendarCategory string) (string, error) {
 
   return strings.Join(attendees, ", "), nil
 }
+
 

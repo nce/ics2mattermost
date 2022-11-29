@@ -94,7 +94,7 @@ func TestGetPersonsByCategory(t *testing.T) {
   assert.Equal(t, "", test)
   assert.NotNil(t, err)
 
-  // one attendee on different cateogry
+  // one attendee on different category
   e.Categories = []string{"leaves"}
   e.Attendees = []gocal.Attendee{{Cn: "Bar Foo"}}
   test, err = e.GetPersonsByCategory("leaves")
