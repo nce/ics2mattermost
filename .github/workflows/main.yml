@@ -1,4 +1,4 @@
-name: Bulid
+name: Build
 on:
 - push
 
