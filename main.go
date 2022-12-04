@@ -44,7 +44,7 @@ func main() {
   s := gocron.NewScheduler(time.Local)
 
   //s.Every(1).Weeks().Monday().Tuesday().Wednesday().Thursday().At("8:30").Do(func() {
-  s.Every(20).Seconds().Do(func() {
+  s.Every(60).Seconds().Do(func() {
 
     cal := icsparser.Setup(
         icsUrl,
@@ -57,7 +57,7 @@ func main() {
     if err == nil {
       webhook.Send(dailyMessage)
     } else {
-      logger.Error(
+      logger.Warn(
         fmt.Sprintf("could not prepare daily: %s", err.Error()))
     }
 

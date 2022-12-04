@@ -41,13 +41,9 @@ func (c *Calendar) gatherRelevantEvents() DailyIngest {
 
 func (c *Calendar) PrepareDailyIngest() (map[string]string, error) {
 
-
-  var err error
-
   ingest := c.gatherRelevantEvents()
   if len(ingest.EventsToday) == 0 {
 
-    logger.Error(err.Error())
     return nil, errors.New("no events today")
 
   } else  {
