@@ -6,13 +6,16 @@ require (
 	github.com/apognu/gocal v0.9.0
 	github.com/go-co-op/gocron v1.18.0
 	github.com/stretchr/testify v1.8.1
+	github.com/virtomize/confluence-go-api v1.4.4
 	go.uber.org/zap v1.23.0
+	golang.org/x/net v0.2.0
 )
 
 require (
 	github.com/ChannelMeter/iso8601duration v0.0.0-20150204201828-8da3af7a2a61 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/kr/pretty v0.3.0 // indirect
+	github.com/magefile/mage v1.14.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
