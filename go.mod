@@ -6,7 +6,7 @@ require (
 	github.com/apognu/gocal v0.9.0
 	github.com/go-co-op/gocron v1.18.0
 	github.com/stretchr/testify v1.8.1
-	go.uber.org/zap v1.23.0
+	go.uber.org/zap v1.24.0
 )
 
 require (
