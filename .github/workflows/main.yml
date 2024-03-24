@@ -18,10 +18,10 @@ jobs:
           make test
 
       - name: Check
-        uses: dominikh/staticcheck-action@v1.2.0
+        uses: dominikh/staticcheck-action@v1.3.1
 
       - name: Scan for Vulnerabilities in Code
-        uses: Templum/govulncheck-action@v0.0.8
+        uses: Templum/govulncheck-action@v0.10.1
         with:
           go-version: 1.19
           vulncheck-version: latest
@@ -29,7 +29,7 @@ jobs:
           fail-on-vuln: true
 
       - name: Lint Dockerfile
-        uses: hadolint/hadolint-action@v2.0.0
+        uses: hadolint/hadolint-action@v2.1.0
         with:
           dockerfile: Dockerfile
           config: hadolint.yaml
